@@ -1,14 +1,13 @@
-import os
-from dotenv import load_dotenv
-from app import signal_groq
+from app import signal_groq, signal_stylometric
 
-load_dotenv()
+ai_text = "Artificial intelligence represents a transformative paradigm shift in modern society. It is important to note that while the benefits of AI are numerous, it is equally essential to consider the ethical implications. Furthermore, stakeholders across various sectors must collaborate to ensure responsible deployment."
 
-# Test 1: Clearly AI-generated
-ai_text = "Artificial intelligence represents a transformative paradigm shift in modern society. It is important to note that while the benefits of AI are numerous, it is equally essential to consider the ethical implications."
+human_text = "ok so i finally tried that new ramen place downtown and honestly? underwhelming. the broth was fine but they put WAY too much sodium in it and i was thirsty for like three hours after. my friend got the spicy version and said it was better. probably won't go back unless someone drags me there"
 
-# Test 2: Clearly human-written
-human_text = "ok so i finally tried that new ramen place downtown and honestly? underwhelming. the broth was fine but they put WAY too much sodium in it and i was thirsty for like three hours after."
+print("=== AI text ===")
+print("Groq score:", signal_groq(ai_text))
+print("Stylometric score:", signal_stylometric(ai_text))
 
-print("AI text score:", signal_groq(ai_text))
-print("Human text score:", signal_groq(human_text))
+print("\n=== Human text ===")
+print("Groq score:", signal_groq(human_text))
+print("Stylometric score:", signal_stylometric(human_text))

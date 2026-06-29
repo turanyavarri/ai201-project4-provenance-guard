@@ -37,6 +37,27 @@ Text to analyze:
     result = json.loads(raw)
     return result["score"]
 
+import re
+import statistics
+
+def signal_stylometric(text):
+    sentences = re.split(r'[.!?]+', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+    
+    if len(sentences) < 2:
+        variance_score = 0.5
+    else:
+        lengths = [len(s.split()) for s in sentences]
+        variance = statistics.variance(lengths)
+        variance_score = max(0.0, min(1.0, 1 - (variance / 40)))
+
+    words = re.findall(r'\b\w+\b', text.lower())
+    ttr = len(set(words)) / len(words) if words else 0.5
+    ttr_score = max(0.0, min(1.0, 1 - ttr))
+
+    stylometric_score = (variance_score * 0.7) + (ttr_score * 0.3)
+    return round(stylometric_score, 3)
+
 # ── Audit log (in-memory for now) ──────────────────────────────────────────
 audit_log = []
 
@@ -57,8 +78,11 @@ def submit():
     # Signal 1: Groq LLM
     llm_score = signal_groq(text)
 
-    # Placeholder confidence (Signal 2 coming in Milestone 4)
-    confidence = llm_score
+    # Signal 2: Stylometric heuristics
+    stylo_score = signal_stylometric(text)
+
+    # Combined confidence: Groq 70%, Stylometric 30%
+    confidence = round((llm_score * 0.7) + (stylo_score * 0.3), 3)
 
     entry = {
         "content_id": content_id,
@@ -67,6 +91,7 @@ def submit():
         "attribution": "pending",
         "confidence": confidence,
         "llm_score": llm_score,
+        "stylo_score": stylo_score,
         "status": "classified"
     }
     write_log(entry)
@@ -76,6 +101,7 @@ def submit():
         "attribution": "pending",
         "confidence": confidence,
         "llm_score": llm_score,
+        "stylo_score": stylo_score,
         "label": "Processing..."
     })
 
